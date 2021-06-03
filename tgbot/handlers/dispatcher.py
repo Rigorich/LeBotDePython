@@ -10,11 +10,9 @@ from telegram.ext import (
     ChosenInlineResultHandler,
 )
 
-from celery.decorators import task  # event processing in async mode
-
 from dtb.settings import TELEGRAM_TOKEN
 
-from tgbot.handlers import admin, commands, files, location
+from tgbot.handlers import admin, commands, location
 from tgbot.handlers.commands import broadcast_command_with_message
 from tgbot.handlers.handlers import secret_level, broadcast_decision_handler
 from tgbot.handlers.manage_data import SECRET_LEVEL_BUTTON, CONFIRM_DECLINE_BROADCAST
@@ -32,14 +30,9 @@ def setup_dispatcher(dp):
     dp.add_handler(CommandHandler("admin", admin.admin))
     dp.add_handler(CommandHandler("stats", admin.stats))
 
-    dp.add_handler(MessageHandler(
-        Filters.animation, files.show_file_id,
-    ))
-
     # location
     dp.add_handler(CommandHandler("ask_location", location.ask_for_location))
     dp.add_handler(MessageHandler(Filters.location, location.location_handler))
-
 
     dp.add_handler(CallbackQueryHandler(secret_level, pattern=f"^{SECRET_LEVEL_BUTTON}"))
 
@@ -74,12 +67,6 @@ def run_pooling():
     print(f"Pooling of '{bot_link}' started")
     updater.start_polling()
     updater.idle()
-
-
-@task(ignore_result=True)
-def process_telegram_event(update_json):
-    update = telegram.Update.de_json(update_json, bot)
-    dispatcher.process_update(update)
 
 
 # Global variable - best way I found to init Telegram bot

@@ -17,7 +17,7 @@ from tgbot.tasks import broadcast_message
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = [
-        'user_id', 'username', 'first_name', 'last_name', 
+        'user_id', 'username', 'first_name', 'last_name',
         'language_code', 'deep_link',
         'created_at', 'updated_at', "is_blocked_bot",
     ]
@@ -49,7 +49,7 @@ class UserAdmin(admin.ModelAdmin):
 
         form = BroadcastForm(initial={'_selected_action': queryset.values_list('user_id', flat=True)})
         return render(
-            request, "admin/broadcast_message.html", {'items': queryset,'form': form, 'title':u' '}
+            request, "admin/broadcast_message.html", {'items': queryset, 'form': form, 'title': u' '}
         )
 
 

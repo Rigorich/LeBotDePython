@@ -15,14 +15,11 @@ if os.path.isfile(dotenv_file):
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv(
-    "DJANGO_SECRET_KEY",
-    'x%#3&%giwv8f0+%r946en7z&d@9*rc$sl0qoql56xr%bh^w2mj',
-)
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 DEBUG = not not os.getenv("DJANGO_DEBUG", False)
 
-ALLOWED_HOSTS = ["*",]  # since Telegram uses a lot of IPs for webhooks
+ALLOWED_HOSTS = ["*", ]  # since Telegram uses a lot of IPs for webhooks
 
 
 INSTALLED_APPS = [
@@ -167,4 +164,3 @@ ENABLE_DECORATOR_LOGGING = os.getenv('ENABLE_DECORATOR_LOGGING', True)
 #     # django.contrib.auth) you may enable sending PII data.
 #     send_default_pii=True
 # )
-

@@ -33,4 +33,3 @@ def stats(update, context):
         parse_mode=telegram.ParseMode.MARKDOWN,
         disable_web_page_preview=True,
     )
-    
