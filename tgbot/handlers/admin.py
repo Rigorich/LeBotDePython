@@ -17,27 +17,9 @@ def admin(update, context):
     """ Show help info about all secret admins commands """
     u = User.get_user(update, context)
     if not u.is_admin:
-        return
+        return update.message.reply_text(static_text.no_access)
 
     return update.message.reply_text(static_text.secret_admin_commands)
-    
-
-def stats(update, context):
-    """ Show help info about all secret admins commands """
-    u = User.get_user(update, context)
-    if not u.is_admin:
-        return
-
-    text = f"""
-*Users*: {User.objects.count()}
-*24h active*: {User.objects.filter(updated_at__gte=now() - datetime.timedelta(hours=24)).count()}
-    """
-
-    return update.message.reply_text(
-        text, 
-        parse_mode=telegram.ParseMode.MARKDOWN,
-        disable_web_page_preview=True,
-    )
 
 
 def broadcast_command_with_message(update, context):
@@ -46,16 +28,13 @@ def broadcast_command_with_message(update, context):
     user_id = extract_user_data_from_update(update)['user_id']
 
     if not u.is_admin:
-        text = static_text.broadcast_no_access
+        return
+
+    text = f"{update.message.text.replace(f'/broadcast', '').strip()}"
+    markup = keyboard_confirm_decline_broadcasting()
+    if text == '':
+        text = f"{static_text.empty_message}\n{static_text.broadcast_help}"
         markup = None
-
-    else:
-        text = f"{update.message.text.replace(f'/broadcast', '').strip()}"
-        markup = keyboard_confirm_decline_broadcasting()
-        if text == '':
-            text = static_text.empty_message
-            markup = None
-
 
     try:
         context.bot.send_message(
@@ -82,7 +61,6 @@ def broadcast_decision_handler(update, context): #callback_data: CONFIRM_DECLINE
     """
     broadcast_decision = update.callback_query.data[len(CONFIRM_DECLINE_BROADCAST):]
     entities_for_celery = update.callback_query.message.to_dict().get('entities')
-    entities = update.callback_query.message.entities
     text = update.callback_query.message.text
     if broadcast_decision == CONFIRM_BROADCAST:
         admin_text = f"{static_text.message_is_sent}"
@@ -95,5 +73,4 @@ def broadcast_decision_handler(update, context): #callback_data: CONFIRM_DECLINE
         text=admin_text,
         chat_id=update.callback_query.message.chat_id,
         message_id=update.callback_query.message.message_id,
-        entities=None if broadcast_decision == CONFIRM_BROADCAST else entities
     )

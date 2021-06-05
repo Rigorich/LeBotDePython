@@ -57,9 +57,6 @@ class User(models.Model):
         else:
             return None
 
-    def invited_users(self):  # --> User queryset 
-        return User.objects.filter(deep_link=str(self.user_id), created_at__gt=self.created_at)
-
 
 class Translation(models.Model):
     native_text = models.CharField(max_length=256)
@@ -82,7 +79,7 @@ class Translation(models.Model):
         known_count = known_translations_ids.count()
         if known_count == 0:
             return None
-        random_index = random.randrange(known_translations_ids.count())
+        random_index = random.randrange(known_count)
         random_id = known_translations_ids[random_index]
         random_known_translation = Translation.objects.get(pk=random_id)
         return random_known_translation

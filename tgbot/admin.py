@@ -25,23 +25,19 @@ class UserAdmin(admin.ModelAdmin):
 
     actions = ['broadcast']
 
-    def invited_users(self, obj):
-        return obj.invited_users().count()
-
     def broadcast(self, request, queryset):
         """ Select users via check mark in django-admin panel, then select "Broadcast" to send message"""
         if 'apply' in request.POST:
             broadcast_message_text = request.POST["broadcast_text"]
 
-            # TODO: for all platforms?
-            if len(queryset) <= 3 or DEBUG:  # for test / debug purposes - run in same thread
+            if DEBUG:  # for test / debug purposes - run in same thread
                 for u in queryset:
                     utils.send_message(user_id=u.id, text=broadcast_message_text, parse_mode=telegram.ParseMode.MARKDOWN)
                 self.message_user(request, "Just broadcasted to %d users" % len(queryset))
             else:
                 user_ids = list(set(u.user_id for u in queryset))
                 random.shuffle(user_ids)
-                broadcast_message.delay(message=broadcast_message_text, user_ids=user_ids)
+                broadcast_message(message=broadcast_message_text, user_ids=user_ids)
                 self.message_user(request, "Broadcasting of %d messages has been started" % len(queryset))
 
             return HttpResponseRedirect(request.get_full_path())

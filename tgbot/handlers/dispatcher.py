@@ -15,6 +15,7 @@ from dtb.settings import TELEGRAM_TOKEN
 from tgbot.handlers import admin, commands, translation, repeat
 from tgbot.handlers.admin import broadcast_command_with_message, broadcast_decision_handler
 from tgbot.handlers.manage_data import CONFIRM_DECLINE_BROADCAST
+from tgbot.models import User, CurrentUserQuiz
 
 
 def setup_dispatcher(dp):
@@ -26,20 +27,27 @@ def setup_dispatcher(dp):
 
     dp.add_handler(CommandHandler("stop", commands.stop))
 
-    # admin commands
-    dp.add_handler(CommandHandler("admin", admin.admin))
-    dp.add_handler(CommandHandler("stats", admin.stats))
+    dp.add_handler(CommandHandler("stats", commands.stats))
 
-    # new command
     dp.add_handler(CommandHandler("new", translation.new_word))
+
+    dp.add_handler(CommandHandler("repeat", repeat.show_quiz))
+
+    # Admin help command
+    dp.add_handler(CommandHandler("admin", admin.admin))
+
+    # CRUD translation commands
+    dp.add_handler(MessageHandler(Filters.regex(rf'^/create_translation.*'), translation.db_create))
+    dp.add_handler(MessageHandler(Filters.regex(rf'^/read_translation.*'), translation.db_read))
+    dp.add_handler(MessageHandler(Filters.regex(rf'^/update_translation.*'), translation.db_update))
+    dp.add_handler(MessageHandler(Filters.regex(rf'^/delete_translation.*'), translation.db_delete))
 
     # broadcast command
     dp.add_handler(MessageHandler(Filters.regex(rf'^/broadcast.*'), broadcast_command_with_message))
     dp.add_handler(CallbackQueryHandler(broadcast_decision_handler, pattern=f"^{CONFIRM_DECLINE_BROADCAST}"))
 
-    # repeat command
-    dp.add_handler(CommandHandler("repeat", repeat.show_quiz))
-    dp.add_handler(MessageHandler(Filters.text, repeat.check))
+    # just text
+    dp.add_handler(MessageHandler(Filters.text, text_handler))
 
     # EXAMPLES FOR HANDLERS
     # dp.add_handler(MessageHandler(Filters.text, <function_handler>))
@@ -54,6 +62,16 @@ def setup_dispatcher(dp):
     # ))
 
     return dp
+
+
+def text_handler(update, context):
+    u = User.get_user(update, context)
+    text = update.message.text
+
+    quiz = CurrentUserQuiz.objects.filter(user=u).first()
+
+    if quiz is not None:
+        repeat.check(update, context)
 
 
 def run_pooling():

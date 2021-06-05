@@ -25,8 +25,3 @@ def broadcast_message(user_ids, message, entities=None, sleep_between=0.4, parse
         time.sleep(max(sleep_between, 0.1))
 
     logger.info("Broadcast finished!")
-
-
-@app.task(ignore_result=True)
-def save_data_from_arcgis(latitude, longitude, location_id):
-    Arcgis.from_json(Arcgis.reverse_geocode(latitude, longitude), location_id=location_id)
