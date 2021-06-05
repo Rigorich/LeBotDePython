@@ -30,13 +30,26 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='Location',
+            name='Translation',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('latitude', models.FloatField()),
-                ('longitude', models.FloatField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='tgbot.user')),
+                ('native_text', models.CharField(max_length=256, db_index=True)),
+                ('translated_text', models.CharField(max_length=256)),
             ],
         ),
+        migrations.CreateModel(
+            name='KnownUserTranslation',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='tgbot.user', db_index=True)),
+                ('translation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='tgbot.translation')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='CurrentUserQuiz',
+            fields=[
+                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to='tgbot.user')),
+                ('known_translation', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='tgbot.knownusertranslation')),
+            ],
+        )
     ]

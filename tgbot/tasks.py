@@ -7,9 +7,7 @@ import time
 from dtb.celery import app
 from celery.utils.log import get_task_logger
 from tgbot.handlers.utils import send_message
-from tgbot.models import (
-    Arcgis
-)
+
 
 logger = get_task_logger(__name__)
 

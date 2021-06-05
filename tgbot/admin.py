@@ -6,8 +6,7 @@ from django.shortcuts import render
 
 from dtb.settings import DEBUG
 
-from tgbot.models import Location, Arcgis
-from tgbot.models import User, UserActionLog
+from tgbot.models import User, UserActionLog, Translation, KnownUserTranslation, CurrentUserQuiz
 from tgbot.forms import BroadcastForm
 from tgbot.handlers import utils
 
@@ -53,14 +52,19 @@ class UserAdmin(admin.ModelAdmin):
         )
 
 
-@admin.register(Location)
-class LocationAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user_id', 'created_at']
+@admin.register(Translation)
+class TranslationAdmin(admin.ModelAdmin):
+    list_display = ['native_text', 'translated_text']
 
 
-@admin.register(Arcgis)
-class ArcgisAdmin(admin.ModelAdmin):
-    list_display = ['location', 'city', 'country_code']
+@admin.register(KnownUserTranslation)
+class KnownUserTranslationAdmin(admin.ModelAdmin):
+    list_display = ['user', 'translation']
+
+
+@admin.register(CurrentUserQuiz)
+class CurrentUserQuizAdmin(admin.ModelAdmin):
+    list_display = ['user', 'known_translation']
 
 
 @admin.register(UserActionLog)

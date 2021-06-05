@@ -12,11 +12,9 @@ from telegram.ext import (
 
 from dtb.settings import TELEGRAM_TOKEN
 
-from tgbot.handlers import admin, commands, location
-from tgbot.handlers.commands import broadcast_command_with_message
-from tgbot.handlers.handlers import secret_level, broadcast_decision_handler
-from tgbot.handlers.manage_data import SECRET_LEVEL_BUTTON, CONFIRM_DECLINE_BROADCAST
-from tgbot.handlers.static_text import broadcast_command
+from tgbot.handlers import admin, commands, translation, repeat
+from tgbot.handlers.admin import broadcast_command_with_message, broadcast_decision_handler
+from tgbot.handlers.manage_data import CONFIRM_DECLINE_BROADCAST
 
 
 def setup_dispatcher(dp):
@@ -24,22 +22,26 @@ def setup_dispatcher(dp):
     Adding handlers for events from Telegram
     """
 
-    dp.add_handler(CommandHandler("start", commands.command_start))
+    dp.add_handler(CommandHandler("start", commands.start))
+
+    dp.add_handler(CommandHandler("stop", commands.stop))
 
     # admin commands
     dp.add_handler(CommandHandler("admin", admin.admin))
     dp.add_handler(CommandHandler("stats", admin.stats))
 
-    # location
-    dp.add_handler(CommandHandler("ask_location", location.ask_for_location))
-    dp.add_handler(MessageHandler(Filters.location, location.location_handler))
+    # new command
+    dp.add_handler(CommandHandler("new", translation.new_word))
 
-    dp.add_handler(CallbackQueryHandler(secret_level, pattern=f"^{SECRET_LEVEL_BUTTON}"))
-
-    dp.add_handler(MessageHandler(Filters.regex(rf'^{broadcast_command} .*'), broadcast_command_with_message))
+    # broadcast command
+    dp.add_handler(MessageHandler(Filters.regex(rf'^/broadcast.*'), broadcast_command_with_message))
     dp.add_handler(CallbackQueryHandler(broadcast_decision_handler, pattern=f"^{CONFIRM_DECLINE_BROADCAST}"))
 
-    #EXAMPLES FOR HANDLERS
+    # repeat command
+    dp.add_handler(CommandHandler("repeat", repeat.show_quiz))
+    dp.add_handler(MessageHandler(Filters.text, repeat.check))
+
+    # EXAMPLES FOR HANDLERS
     # dp.add_handler(MessageHandler(Filters.text, <function_handler>))
     # dp.add_handler(MessageHandler(
     #     Filters.document, <function_handler>,
