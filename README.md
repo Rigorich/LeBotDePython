@@ -7,7 +7,7 @@ currently designed to help you learn new words
 - /repeat - repeat shown word to remember it
 - /admin - list of admin's commands
 
-
+----
 ### How to run
 
 #### 1) Clone repository and install required packages
@@ -37,8 +37,9 @@ python manage.py migrate
 python run_pooling.py 
 ```
 
-#### 5) Run Django admin (http://localhost:8000/tgadmin/)
+#### 5) Create super user and run Django admin panel (http://localhost:8000/tgadmin/)
 ```
+python manage.py createsuperuser
 python manage.py runserver
 ```
 
