@@ -1,3 +1,5 @@
+import run_pooling
+
 import pytest
 import json
 import re
