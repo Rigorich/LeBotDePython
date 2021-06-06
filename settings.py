@@ -5,7 +5,7 @@ import dotenv
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent
 
 
 # Load env variables from file
@@ -17,7 +17,7 @@ if os.path.isfile(dotenv_file):
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
-DEBUG = not not os.getenv("DJANGO_DEBUG", False)
+DEBUG = bool(int(os.getenv("DEBUG", "0")))
 
 ALLOWED_HOSTS = ["*", ]  # since Telegram uses a lot of IPs for webhooks
 
@@ -139,7 +139,8 @@ CELERY_TASK_DEFAULT_QUEUE = 'default'
 
 # -----> TELEGRAM
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-
+ADMIN_ID = os.getenv("ADMIN_ID", None)
+TESTER_ID = os.getenv("TESTER_ID", ADMIN_ID)
 
 # -----> LOGGING
 ENABLE_DECORATOR_LOGGING = os.getenv('ENABLE_DECORATOR_LOGGING', True)

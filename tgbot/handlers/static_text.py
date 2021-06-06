@@ -6,6 +6,7 @@ start_message = 'Я ещё в бета-версии. \n' \
 
 stop_accepted = "Ладушки!"
 
+unknown_command = "Неизвестная команда"
 no_access = "Нет доступа."
 nothing_found = "Ничего не найдено"
 empty_message = "Пустое сообщение"
@@ -24,7 +25,7 @@ known_words = "Изученные слова"
 
 quiz_right_answer = "Верно!"
 
-secret_admin_commands = "⚠️Admin commands ⚠\n" \
+secret_admin_commands = "⚠️ Admin commands  ⚠\n" \
                         "\nДля изменения словаря:\n" \
                         "/create_translation\n" \
                         "/read_translation\n" \

@@ -9,12 +9,12 @@ from random import shuffle
 
 QUIZ_WRONG_ANSWERS_COUNT = 3
 
-def show_quiz(update, context):
+def show_quiz(update, context) -> 'telegram.Message':
     """ Entered /repeat command"""
     u = User.get_user(update, context)
     t = Translation.get_random_known_translation_for_user(u)
     if t is None:
-        context.bot.send_message(
+        return context.bot.send_message(
             chat_id=u.user_id,
             text=no_repeat_words,
             reply_markup=telegram.ReplyKeyboardMarkup([
@@ -22,9 +22,8 @@ def show_quiz(update, context):
                  telegram.KeyboardButton(text="/stop"), ]
             ], resize_keyboard=True),
         )
-        return
     quiz = get_quiz(u, t)
-    context.bot.send_message(
+    message = context.bot.send_message(
         chat_id=u.user_id,
         text=f"{t.native_text} - ?",
         reply_markup=telegram.ReplyKeyboardMarkup(
@@ -36,9 +35,10 @@ def show_quiz(update, context):
     )
     known = KnownUserTranslation.objects.get(translation=t)
     CurrentUserQuiz(user=u, known_translation=known).save()
+    return message
 
 
-def get_quiz(user, translation):
+def get_quiz(user, translation) -> list:
     answers = [translation.translated_text]
     known_count = KnownUserTranslation.objects.filter(user=user).count()
     all_count = Translation.objects.count()
@@ -72,13 +72,13 @@ def check(update, context):
     quiz.delete()
 
     if text == quiz_translation.translated_text:
-        context.bot.send_message(
+        message = context.bot.send_message(
             chat_id=u.user_id,
             text=quiz_right_answer
         )
-        show_quiz(update, context)
+        return message, show_quiz(update, context)
     else:
-        context.bot.send_message(
+        return context.bot.send_message(
             chat_id=u.user_id,
             text=str(quiz_translation),
             reply_markup=telegram.ReplyKeyboardMarkup([

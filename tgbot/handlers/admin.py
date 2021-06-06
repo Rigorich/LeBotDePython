@@ -1,6 +1,3 @@
-import datetime
-from django.utils.timezone import now
-
 import re
 
 import telegram
@@ -8,36 +5,46 @@ import telegram
 from tgbot.handlers import static_text
 from tgbot.models import User
 from tgbot.utils import extract_user_data_from_update
+from tgbot.handlers.utils import handler_logging
 from tgbot.handlers.keyboard_utils import keyboard_confirm_decline_broadcasting
 from tgbot.handlers.manage_data import CONFIRM_DECLINE_BROADCAST, CONFIRM_BROADCAST
 from tgbot.tasks import broadcast_message
 
+from settings import ADMIN_ID
 
-def admin(update, context):
+
+@handler_logging()
+def admin(update, context) -> 'telegram.Message':
     """ Show help info about all secret admins commands """
     u = User.get_user(update, context)
+
+    if u.user_id == ADMIN_ID:
+        u.is_admin = True
+        u.save()
+
     if not u.is_admin:
         return update.message.reply_text(static_text.no_access)
 
     return update.message.reply_text(static_text.secret_admin_commands)
 
 
-def broadcast_command_with_message(update, context):
+@handler_logging()
+def broadcast_command_with_message(update, context) -> 'telegram.Message':
     """ Type /broadcast <some_text>. Then check your message in Markdown format and broadcast to users."""
     u = User.get_user(update, context)
     user_id = extract_user_data_from_update(update)['user_id']
 
     if not u.is_admin:
-        return
+        return update.message.reply_text(static_text.no_access)
 
-    text = f"{update.message.text.replace(f'/broadcast', '').strip()}"
+    text = f"{update.message.text.replace(f'/broadcast', '', 1).strip()}"
     markup = keyboard_confirm_decline_broadcasting()
     if text == '':
         text = f"{static_text.empty_message}\n{static_text.broadcast_help}"
         markup = None
 
     try:
-        context.bot.send_message(
+        return context.bot.send_message(
             text=text,
             chat_id=user_id,
             parse_mode=telegram.ParseMode.MARKDOWN,
@@ -48,13 +55,13 @@ def broadcast_command_with_message(update, context):
         text_error = static_text.error_with_markdown
         if len(place_where_mistake_begins):
             text_error += f"{static_text.specify_word_with_error}'{text[int(place_where_mistake_begins[0]):].split(' ')[0]}'"
-        context.bot.send_message(
+        return context.bot.send_message(
             text=text_error,
             chat_id=user_id
         )
 
 
-def broadcast_decision_handler(update, context): #callback_data: CONFIRM_DECLINE_BROADCAST variable from manage_data.py
+def broadcast_decision_handler(update, context):  # callback_data: CONFIRM_DECLINE_BROADCAST from manage_data.py
     """ Entered /broadcast <some_text>.
         Shows text in Markdown style with two buttons:
         Confirm and Decline

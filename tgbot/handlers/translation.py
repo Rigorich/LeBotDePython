@@ -3,17 +3,17 @@ import telegram
 from tgbot.handlers import static_text
 from tgbot.models import User, Translation, KnownUserTranslation
 from tgbot.utils import extract_user_data_from_update
-
+from tgbot.handlers.utils import handler_logging
 from tgbot.handlers.static_text import no_new_words
 
 
-def new_word(update, context):
+def new_word(update, context) -> 'telegram.Message':
     """ Entered /new command"""
 
     u = User.get_user(update, context)
     t = Translation.get_unknown_translation_for_user(u)
     if t is None:
-        context.bot.send_message(
+        return context.bot.send_message(
             chat_id=u.user_id,
             text=no_new_words,
             reply_markup=telegram.ReplyKeyboardMarkup([
@@ -21,8 +21,7 @@ def new_word(update, context):
                  telegram.KeyboardButton(text="/stop"), ]
             ], resize_keyboard=True),
         )
-        return
-    context.bot.send_message(
+    message = context.bot.send_message(
         chat_id=u.user_id,
         text=str(t),
         reply_markup=telegram.ReplyKeyboardMarkup([
@@ -32,14 +31,16 @@ def new_word(update, context):
         ], resize_keyboard=True),
     )
     KnownUserTranslation(user=u, translation=t).save()
+    return message
 
 
-def db_create(update, context):
+@handler_logging()
+def db_create(update, context) -> 'telegram.Message':
     u = User.get_user(update, context)
     user_id = extract_user_data_from_update(update)['user_id']
 
     if not u.is_admin:
-        return
+        return update.message.reply_text(static_text.no_access)
 
     text = update.message.text.replace(f'/create_translation', '').strip()
 
@@ -50,18 +51,19 @@ def db_create(update, context):
         Translation(native_text=words[0], translated_text=words[1]).save()
         text = f"{words[0]} - {words[1]}"
 
-    context.bot.send_message(
+    return context.bot.send_message(
         text=text,
         chat_id=user_id,
     )
 
 
-def db_read(update, context):
+@handler_logging()
+def db_read(update, context) -> 'telegram.Message':
     u = User.get_user(update, context)
     user_id = extract_user_data_from_update(update)['user_id']
 
     if not u.is_admin:
-        return
+        return update.message.reply_text(static_text.no_access)
 
     text = update.message.text.replace(f'/read_translation', '').strip()
     if text == "":
@@ -77,18 +79,19 @@ def db_read(update, context):
             text = f"#{tr.id} : \n" \
                    f"{tr.native_text} - {tr.translated_text}"
 
-    context.bot.send_message(
+    return context.bot.send_message(
         text=text,
         chat_id=user_id,
     )
 
 
-def db_update(update, context):
+@handler_logging()
+def db_update(update, context) -> 'telegram.Message':
     u = User.get_user(update, context)
     user_id = extract_user_data_from_update(update)['user_id']
 
     if not u.is_admin:
-        return
+        return update.message.reply_text(static_text.no_access)
 
     text = update.message.text.replace(f'/update_translation', '').strip()
 
@@ -102,18 +105,19 @@ def db_update(update, context):
         tr.save()
         text = str(tr)
 
-    context.bot.send_message(
+    return context.bot.send_message(
         text=text,
         chat_id=user_id,
     )
 
 
-def db_delete(update, context):
+@handler_logging()
+def db_delete(update, context) -> 'telegram.Message':
     u = User.get_user(update, context)
     user_id = extract_user_data_from_update(update)['user_id']
 
     if not u.is_admin:
-        return
+        return update.message.reply_text(static_text.no_access)
 
     text = update.message.text.replace(f'/delete_translation', '').strip()
     if text == "" or not text.isdigit():
@@ -127,7 +131,7 @@ def db_delete(update, context):
             text = f"DELETED: \n" \
                    f"{tr.native_text} - {tr.translated_text}"
 
-    context.bot.send_message(
+    return context.bot.send_message(
         text=text,
         chat_id=user_id,
     )

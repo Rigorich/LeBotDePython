@@ -27,30 +27,17 @@ class User(models.Model):
         return f'@{self.username}' if self.username is not None else f'{self.user_id}'
 
     @classmethod
-    def get_user_and_created(cls, update, context):
+    def get_user(cls, update, context) -> 'User':
         """ python-telegram-bot's Update, Context --> User instance """
         data = utils.extract_user_data_from_update(update)
-        u, created = cls.objects.update_or_create(user_id=data["user_id"], defaults=data)
-
-        if created:
-            if context is not None and context.args is not None and len(context.args) > 0:
-                payload = context.args[0]
-                if str(payload).strip() != str(data["user_id"]).strip():  # you can't invite yourself
-                    u.deep_link = payload
-                    u.save()
-
-        return u, created
+        user, created = cls.objects.update_or_create(user_id=data["user_id"], defaults=data)
+        return user
 
     @classmethod
-    def get_user(cls, update, context):
-        u, _ = cls.get_user_and_created(update, context)
-        return u
-
-    @classmethod
-    def get_user_by_username_or_user_id(cls, string):
+    def get_user_by_username_or_user_id(cls, string) -> 'User':
         """ Search user in DB, return User or None if not found """
         username = str(string).strip().lower()
-        if string.startswith('@'):
+        if username.startswith('@'):
             return cls.objects.filter(username__iexact=username).first()
         elif username.isdigit():  # user_id
             return cls.objects.filter(user_id=int(username)).first()
@@ -66,14 +53,14 @@ class Translation(models.Model):
         return f'{self.native_text} - {self.translated_text}'
 
     @classmethod
-    def get_unknown_translation_for_user(cls, user):
+    def get_unknown_translation_for_user(cls, user) -> 'Translation':
         """ Search unknown word in DB, return None if not found """
         known_translations_ids = KnownUserTranslation.objects.filter(user=user).values_list('translation', flat=True)
         unknown_translation = Translation.objects.exclude(id__in=known_translations_ids).first()
         return unknown_translation
 
     @classmethod
-    def get_random_known_translation_for_user(cls, user):
+    def get_random_known_translation_for_user(cls, user) -> 'Translation':
         """ Search known word in DB, return None if not found """
         known_translations_ids = KnownUserTranslation.objects.filter(user=user).values_list('translation', flat=True)
         known_count = known_translations_ids.count()

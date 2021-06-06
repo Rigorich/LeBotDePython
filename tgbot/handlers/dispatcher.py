@@ -3,16 +3,16 @@
 """
 
 import telegram
+from telegram import Update
 from telegram.ext import (
     Updater, Dispatcher, Filters,
     CommandHandler, MessageHandler,
-    InlineQueryHandler, CallbackQueryHandler,
-    ChosenInlineResultHandler,
+    CallbackQueryHandler,
 )
 
-from dtb.settings import TELEGRAM_TOKEN
+from settings import TELEGRAM_TOKEN
 
-from tgbot.handlers import admin, commands, translation, repeat
+from tgbot.handlers import admin, commands, translation, repeat, static_text
 from tgbot.handlers.admin import broadcast_command_with_message, broadcast_decision_handler
 from tgbot.handlers.manage_data import CONFIRM_DECLINE_BROADCAST
 from tgbot.models import User, CurrentUserQuiz
@@ -64,17 +64,19 @@ def setup_dispatcher(dp):
     return dp
 
 
-def text_handler(update, context):
+def text_handler(update: Update, context):
     u = User.get_user(update, context)
     text = update.message.text
 
     quiz = CurrentUserQuiz.objects.filter(user=u).first()
 
     if quiz is not None:
-        repeat.check(update, context)
+        return repeat.check(update, context)
+    if text.startswith("/"):
+        return update.message.bot.send_message(chat_id=u.user_id, text=static_text.unknown_command)
 
 
-def run_pooling():
+def run_pooling():   # pragma: no cover
     """ Run bot in pooling mode """
     updater = Updater(TELEGRAM_TOKEN, use_context=True)
 
@@ -87,6 +89,11 @@ def run_pooling():
     print(f"Pooling of '{bot_link}' started")
     updater.start_polling()
     updater.idle()
+
+
+def stop_pooling():   # pragma: no cover
+    updater = Updater(TELEGRAM_TOKEN, use_context=True)
+    updater.stop()
 
 
 # Global variable - best way I found to init Telegram bot
