@@ -1,5 +1,3 @@
-import run_pooling
-
 import pytest
 import json
 import re
@@ -9,7 +7,7 @@ import telegram
 from tgbot.handlers import admin, commands, translation, repeat, dispatcher
 from tgbot.models import User
 
-from settings import TELEGRAM_TOKEN, TESTER_ID
+from dtb.settings import TELEGRAM_TOKEN, TESTER_ID
 
 bot = telegram.Bot(TELEGRAM_TOKEN)
 

@@ -5,7 +5,7 @@ import dotenv
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Load env variables from file
@@ -139,8 +139,8 @@ CELERY_TASK_DEFAULT_QUEUE = 'default'
 
 # -----> TELEGRAM
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-ADMIN_ID = os.getenv("ADMIN_ID", None)
-TESTER_ID = os.getenv("TESTER_ID", ADMIN_ID)
+ADMIN_ID = int(os.getenv("ADMIN_ID")) if os.getenv("ADMIN_ID") is not None else None
+TESTER_ID = int(os.getenv("TESTER_ID")) if os.getenv("TESTER_ID") is not None else ADMIN_ID
 
 # -----> LOGGING
 ENABLE_DECORATOR_LOGGING = os.getenv('ENABLE_DECORATOR_LOGGING', True)

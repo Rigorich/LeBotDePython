@@ -10,7 +10,7 @@ from telegram.ext import (
     CallbackQueryHandler,
 )
 
-from settings import TELEGRAM_TOKEN
+from dtb.settings import TELEGRAM_TOKEN
 
 from tgbot.handlers import admin, commands, translation, repeat, static_text
 from tgbot.handlers.admin import broadcast_command_with_message, broadcast_decision_handler

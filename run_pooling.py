@@ -2,10 +2,10 @@ import os
 import django
 import logging
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dtb.settings')
 django.setup()
 
-from settings import DEBUG
+from dtb.settings import DEBUG
 from tgbot.handlers.dispatcher import run_pooling
 
 if __name__ == "__main__":

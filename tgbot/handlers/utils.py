@@ -1,4 +1,4 @@
-from settings import ENABLE_DECORATOR_LOGGING
+from dtb.settings import ENABLE_DECORATOR_LOGGING
 from django.utils import timezone
 from tgbot.models import UserActionLog, User
 import logging

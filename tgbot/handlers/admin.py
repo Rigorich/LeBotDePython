@@ -10,7 +10,7 @@ from tgbot.handlers.keyboard_utils import keyboard_confirm_decline_broadcasting
 from tgbot.handlers.manage_data import CONFIRM_DECLINE_BROADCAST, CONFIRM_BROADCAST
 from tgbot.tasks import broadcast_message
 
-from settings import ADMIN_ID
+from dtb.settings import ADMIN_ID
 
 
 @handler_logging()

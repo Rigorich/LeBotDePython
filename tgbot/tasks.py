@@ -8,7 +8,7 @@ import telegram
 from telegram import MessageEntity
 
 from dtb.celery import app
-from settings import TELEGRAM_TOKEN
+from dtb.settings import TELEGRAM_TOKEN
 from celery.utils.log import get_task_logger
 
 from tgbot.models import User
