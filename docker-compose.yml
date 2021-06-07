@@ -12,58 +12,30 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     env_file:
-      - ./.env
+      - project/.env
     ports:
       - 5433:5432
   redis:
     image: redis:alpine
     container_name: redis
-  web:
-    build: .
-    container_name: django
-    command: bash -c "python manage.py collectstatic --noinput && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-    volumes:
-      - .:/code
+  bot:
+    image: rigorich/le_bot_de_python:bot
+    container_name: bot
+    command: bash -c "python manage.py collectstatic --noinput &&
+      python manage.py migrate &&
+      python run_pooling.py &
+      celery -A dtb worker --loglevel=INFO &
+      celery -A dtb beat --loglevel=INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler &
+      python manage.py runserver 0.0.0.0:8000"
     ports:
       - 8000:8000
     environment:
-      - DJANGO_DEBUG='True'
+      - DJANGO_DEBUG='False'
     env_file:
-      - ./.env
+      - project/.env
     depends_on:
       - db
       - redis
-  bot:
-    build: .
-    container_name: tg_bot
-    command: python run_pooling.py
-    env_file:
-      - ./.env
-    depends_on:
-      - web
-  celery:
-    build: .
-    container_name: celery
-    command: celery -A dtb worker --loglevel=INFO
-    volumes:
-      - .:/code
-    env_file:
-      - ./.env
-    depends_on:
-      - redis
-      - web
-  celery-beat:
-    build: .
-    container_name: celery_beat
-    command: celery -A dtb beat --loglevel=INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    volumes:
-      - .:/code
-    env_file:
-      - ./.env
-    depends_on:
-      - redis
-      - celery
-      - web
 
 volumes:
   postgres_data:
